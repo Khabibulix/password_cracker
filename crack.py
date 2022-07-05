@@ -10,10 +10,10 @@ class Color:
 
 class Cracker:
     @staticmethod
-    def crack_dict(md5, file):
+    def crack_dict(hash_provided, file):
         """
         Cracking using a wordlist
-        :param md5: hash md5 to crack
+        :param hash_provided: hash to crack
         :param file: wordlist to use
         :return:
         """
@@ -23,7 +23,7 @@ class Cracker:
             for mot in opened_file.readlines():
                 mot = mot.strip("\n").encode("utf8")
                 hash = hashlib.md5(mot).hexdigest()
-                if hash == md5:
+                if hash == hash_provided:
                     print(Color.VERT + "Password found", str(mot).replace("b'", "")[:-1], "--", hash + Color.FIN)
                     found = True
             if not found:
@@ -35,10 +35,10 @@ class Cracker:
             sys.exit(1)
 
     @staticmethod
-    def crack_incr(md5, length, _currpass=[]):
+    def crack_incr(hash_provided, length, _currpass=[]):
         """
-        Cracking using bruteforce
-        :param md5: hash md5 to crack
+        Cracking using bruteforce, not really effective
+        :param hash_provided: hash md5 to crack
         :param length: length of password to crack
         :param _currpass: temporary list modifying via recursion
         :return:
@@ -50,24 +50,24 @@ class Cracker:
         if length >= 1:
             if len(_currpass) == 0:
                 _currpass = ['a' for _ in range(length)]
-                crack_incr(md5, length, _currpass)
+                crack_incr(hash_provided, length, _currpass)
             else:
                 for c in lettres:
                     _currpass[length - 1] = c
                     currhash = hashlib.md5(pwd.encode("utf8")).hexdigest()
                     print("Trying:", pwd, "-->", currhash)
-                    if currhash == md5:
+                    if currhash == hash_provided:
                         print(Color.VERT + "Password found", pwd + Color.FIN)
                         sys.exit(0)
                     else:
-                        crack_incr(md5, length - 1, _currpass)
+                        crack_incr(hash_provided, length - 1, _currpass)
 
     @staticmethod
-    def crack_smart(md5, pattern, _index=0):
+    def crack_smart(hash_provided, pattern, _index=0):
         """
-        :param md5:
+        :param hash_provided: hash to crack
         :param pattern:
-        :param _index:
+        :param _index: private variable
         :return:
         """
         MAJ = string.ascii_uppercase
@@ -76,38 +76,48 @@ class Cracker:
 
         if _index < len(pattern):
             if pattern[_index] in MAJ + CHIFFRES + MIN:
-                cracker.crack_smart(md5, pattern, _index+1)
+                cracker.crack_smart(hash_provided, pattern, _index+1)
             if "^" == pattern[_index]:
                 for c in MAJ:
                     p = pattern.replace("^", c, 1)
                     currhash = hashlib.md5(p.encode("utf8")).hexdigest()
-                    if currhash == md5:
+                    if currhash == hash_provided:
                         print(Color.VERT + "Found: " + p + Color.FIN)
-                    cracker.crack_smart(md5, p, _index + 1)
+                    cracker.crack_smart(hash_provided, p, _index + 1)
             if "*" == pattern[_index]:
                 for c in MIN:
                     p = pattern.replace("*", c, 1)
                     currhash = hashlib.md5(p.encode("utf8")).hexdigest()
-                    if currhash == md5:
+                    if currhash == hash_provided:
                         print(Color.VERT + "Found: " + p + Color.FIN)
-                    cracker.crack_smart(md5, p, _index + 1)
+                    cracker.crack_smart(hash_provided, p, _index + 1)
             if "²" == pattern[_index]:
                 for c in CHIFFRES:
                     p = pattern.replace("²", c, 1)
                     currhash = hashlib.md5(p.encode("utf8")).hexdigest()
-                    if currhash == md5:
+                    if currhash == hash_provided:
                         print(Color.VERT + "Found: " + p + Color.FIN)
-                    cracker.crack_smart(md5, p, _index + 1)
+                    cracker.crack_smart(hash_provided, p, _index + 1)
         else:
             return
+
+    @staticmethod
+    def generate_the_hack(arg, pwd_to_encrypt):
+        if arg == 1:
+            return hashlib.md5(pwd_to_encrypt.encode("utf8")).hexdigest()
+        if arg == 2:
+            return hashlib.sha256(pwd_to_encrypt.encode("utf8")).hexdigest()
+        else:
+            return None
 
 def display_time():
     print("Durée :", str(time.time() - debut), "secondes")
 
 parser = argparse.ArgumentParser(description="Password Cracker")
 parser.add_argument("-f", "--file", dest="file", help="Path to wordlist file", required=False)
-parser.add_argument("-g", "--gen", dest="gen", help="Generate MD5 hash of password",required=False)
-parser.add_argument("-md5", dest="md5", help="Hashed Password (MD5)", required=False)
+parser.add_argument("-g", "--gen", dest="gen", help="Choose hashing of password (1 for md5, 2 for sha-256",required=False, type=int)
+parser.add_argument("-pwd", "--password", dest="pwd", help="Password to encrypt")
+parser.add_argument("-hash", dest="md5", help="Hashed Password", required=False)
 parser.add_argument("-l", dest="plength", help="Password Length", type=int, required=False)
 parser.add_argument("-p", dest="pattern", help="Using pattern of password (^=Maj, *=Min, ²=Chiffre)",required=False)
 
@@ -118,20 +128,40 @@ atexit.register(display_time)
 
 cracker = Cracker()
 
-if args.md5:
-    print("[Cracking hash:", args.md5,"]")
+if args.pwd:
     if args.file and not args.plength:
-        print("[Using wordlist", args.file,"]")
+        print("[Cracking using wordlist", args.file,"]")
         Cracker.crack_dict(args.md5, args.file)
     elif args.plength and not args.file:
-        print("[Using incremental mode for", str(args.plength), "letter(s)]")
+        print("[Cracking using incremental mode for", str(args.plength), "letter(s)]")
         Cracker.crack_incr(args.md5, args.plength)
     elif args.pattern:
-        print("[Using pattern mode for", str(args.pattern),"]")
+        print("[Cracking using pattern mode for", str(args.pattern),"]")
         Cracker.crack_smart(args.md5, args.pattern)
+    elif args.gen:
+        pwd = args.pwd
+        args = vars(parser.parse_args())
+        if args["gen"] == 1:  # md5
+            print("[MD5 hash is:", cracker.generate_the_hack(1, pwd), "]")
+        if args["gen"] == 2:  # sha-256
+            print("[SHA-256 hash is", cracker.generate_the_hack(2, pwd), "]")
+        args = parser.parse_args()
+        if not args.pwd:
+            print(Color.ROUGE, "You must provide a password to encrypt, dummy", Color.FIN)
+            if not args.gen:
+                while True:
+                    algo = input(Color.ROUGE, "In which algorithm do you want to encrypt the password?", Color.FIN)
+                    if algo == 1:
+                        print("[The MD5 hash is:", cracker.generate_the_hack(1, args.pwd))
+                        break
+                    if algo == 2:
+                        print("[SHA-256 hash is", cracker.generate_the_hack(2, args.pwd))
+                        break
+                    else:
+                        print(Color.ROUGE, "Invalid input, please enter 1 for MD5, or 2 for sha-256", Color.FIN)
+                        continue
     else:
+        print(Color.ROUGE + "MD5 hash not provided" + Color.FIN)
+    if not args.file and not args.plength and not args.gen:
         print(Color.ROUGE + "Choose either -f or -l argument" + Color.FIN)
-else:
-    print(Color.ROUGE + "MD5 hash not provided" + Color.FIN)
-    if args.gen:
-        print("[MD5 hash of", args.gen, ":", hashlib.md5(args.gen.encode("utf8")).hexdigest())
+
