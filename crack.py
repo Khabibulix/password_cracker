@@ -3,10 +3,13 @@
 
 import time, string, hashlib, sys, argparse, atexit
 
-class Color:
+class Layout:
     ROUGE = '\033[91m'
     VERT = '\033[92m'
     FIN = '\033[0m'
+    UNDERLINE = "\x1B[4m"
+    FIN_UNDERLINE = "\x1B[0m"
+    BOLD = '\033[1m'
 
 class Cracker:
     @staticmethod
@@ -24,14 +27,14 @@ class Cracker:
                 mot = mot.strip("\n").encode("utf8")
                 hash = hashlib.md5(mot).hexdigest()
                 if hash == hash_provided:
-                    print(Color.VERT + "Password found", str(mot).replace("b'", "")[:-1], "--", hash + Color.FIN)
+                    print(Layout.VERT + "Password found", str(mot).replace("b'", "")[:-1], "--", hash + Layout.FIN)
                     found = True
             if not found:
-                print(Color.ROUGE + "Not found" + Color.FIN)
+                print(Layout.ROUGE + "Not found" + Layout.FIN)
             opened_file.close()
 
         except FileNotFoundError as fnfe:
-            print(Color.ROUGE + "File does not exist:", str(fnfe) + Color.FIN)
+            print(Layout.ROUGE + "File does not exist:", str(fnfe) + Layout.FIN)
             sys.exit(1)
 
     @staticmethod
@@ -57,7 +60,7 @@ class Cracker:
                     currhash = hashlib.md5(pwd.encode("utf8")).hexdigest()
                     print("Trying:", pwd, "-->", currhash)
                     if currhash == hash_provided:
-                        print(Color.VERT + "Password found", pwd + Color.FIN)
+                        print(Layout.VERT + "Password found", pwd + Layout.FIN)
                         sys.exit(0)
                     else:
                         crack_incr(hash_provided, length - 1, _currpass)
@@ -82,21 +85,21 @@ class Cracker:
                     p = pattern.replace("^", c, 1)
                     currhash = hashlib.md5(p.encode("utf8")).hexdigest()
                     if currhash == hash_provided:
-                        print(Color.VERT + "Found: " + p + Color.FIN)
+                        print(Layout.VERT + "Found: " + p + Layout.FIN)
                     cracker.crack_smart(hash_provided, p, _index + 1)
             if "*" == pattern[_index]:
                 for c in MIN:
                     p = pattern.replace("*", c, 1)
                     currhash = hashlib.md5(p.encode("utf8")).hexdigest()
                     if currhash == hash_provided:
-                        print(Color.VERT + "Found: " + p + Color.FIN)
+                        print(Layout.VERT + "Found: " + p + Layout.FIN)
                     cracker.crack_smart(hash_provided, p, _index + 1)
             if "²" == pattern[_index]:
                 for c in CHIFFRES:
                     p = pattern.replace("²", c, 1)
                     currhash = hashlib.md5(p.encode("utf8")).hexdigest()
                     if currhash == hash_provided:
-                        print(Color.VERT + "Found: " + p + Color.FIN)
+                        print(Layout.VERT + "Found: " + p + Layout.FIN)
                     cracker.crack_smart(hash_provided, p, _index + 1)
         else:
             return
@@ -113,7 +116,13 @@ class Cracker:
 def display_time():
     print("Durée :", str(time.time() - debut), "secondes")
 
-parser = argparse.ArgumentParser(description="Password Cracker")
+parser = argparse.ArgumentParser(
+    description="████████████████████████████"
+                +Layout.BOLD+Layout.UNDERLINE+
+                "Password Cracker"+Layout.FIN+
+                "█████████████████████████████████",
+    epilog="██████████████████████████████████████████████████████████████████████████████"
+)
 parser.add_argument("-f", "--file", dest="file", help="Path to wordlist file", required=False)
 parser.add_argument("-g", "--gen", dest="gen", help="Choose hashing of password (1 for md5, 2 for sha-256",required=False, type=int)
 parser.add_argument("-pwd", "--password", dest="pwd", help="Password to encrypt")
@@ -149,20 +158,27 @@ if args.pwd:
 
     elif not args.gen:
         while True:
-            algo = input(Color.ROUGE, "In which algorithm do you want to encrypt the password?", Color.FIN)
+            algo = input(Layout.ROUGE, "In which algorithm do you want to encrypt the password?", Layout.FIN)
             if algo == 1:
-                print("[The MD5 hash is:", cracker.generate_the_hack(1, args.pwd))
+                print(Layout.UNDERLINE+"[The MD5 hash is:",Layout.FIN_UNDERLINE, cracker.generate_the_hack(1, args.pwd))
                 break
             if algo == 2:
-                print("[SHA-256 hash is", cracker.generate_the_hack(2, args.pwd))
+                print(Layout.UNDERLINE+"[SHA-256 hash is",Layout.FIN_UNDERLINE, cracker.generate_the_hack(2, args.pwd))
                 break
             else:
-                print(Color.ROUGE, "Invalid input, please enter 1 for MD5, or 2 for sha-256)", Color.FIN)
+                print(Layout.ROUGE, "Invalid input, please enter 1 for MD5, or 2 for sha-256)", Layout.FIN)
                 continue
 
 if args.gen and not args.pwd:
-    print(Color.ROUGE + "You must provide a password to encrypt, dummy. Use -pwd for that. Example: -pwd 'password' where password will be encrypted", Color.FIN)
+    print(Layout.ROUGE +
+          "You must provide a password to encrypt, dummy. Use -pwd for that. "
+          #+Layout.FIN+
+          +Layout.UNDERLINE +
+          "Example:"+
+          Layout.FIN+
+          Layout.FIN_UNDERLINE+
+          " -pwd 'password' where password will be encrypted",)
 
 if not args.file and not args.plength and not args.gen:
-    print(Color.ROUGE + "Enter -h to display help" + Color.FIN)
+    print(Layout.ROUGE + "Enter -h to display help" + Layout.FIN)
 
