@@ -117,7 +117,7 @@ parser = argparse.ArgumentParser(description="Password Cracker")
 parser.add_argument("-f", "--file", dest="file", help="Path to wordlist file", required=False)
 parser.add_argument("-g", "--gen", dest="gen", help="Choose hashing of password (1 for md5, 2 for sha-256",required=False, type=int)
 parser.add_argument("-pwd", "--password", dest="pwd", help="Password to encrypt")
-parser.add_argument("-hash", dest="md5", help="Hashed Password", required=False)
+parser.add_argument("-hash", dest="hashed", help="Hashed Password", required=False)
 parser.add_argument("-l", dest="plength", help="Password Length", type=int, required=False)
 parser.add_argument("-p", dest="pattern", help="Using pattern of password (^=Maj, *=Min, ²=Chiffre)",required=False)
 
@@ -138,7 +138,7 @@ if args.pwd:
     elif args.pattern:
         print("[Cracking using pattern mode for", str(args.pattern),"]")
         Cracker.crack_smart(args.md5, args.pattern)
-    elif args.gen:
+    elif args.gen: #if no hash, we create one
         pwd = args.pwd
         args = vars(parser.parse_args())
         if args["gen"] == 1:  # md5
@@ -146,22 +146,23 @@ if args.pwd:
         if args["gen"] == 2:  # sha-256
             print("[SHA-256 hash is", cracker.generate_the_hack(2, pwd), "]")
         args = parser.parse_args()
-        if not args.pwd:
-            print(Color.ROUGE, "You must provide a password to encrypt, dummy", Color.FIN)
-            if not args.gen:
-                while True:
-                    algo = input(Color.ROUGE, "In which algorithm do you want to encrypt the password?", Color.FIN)
-                    if algo == 1:
-                        print("[The MD5 hash is:", cracker.generate_the_hack(1, args.pwd))
-                        break
-                    if algo == 2:
-                        print("[SHA-256 hash is", cracker.generate_the_hack(2, args.pwd))
-                        break
-                    else:
-                        print(Color.ROUGE, "Invalid input, please enter 1 for MD5, or 2 for sha-256", Color.FIN)
-                        continue
-    else:
-        print(Color.ROUGE + "MD5 hash not provided" + Color.FIN)
-    if not args.file and not args.plength and not args.gen:
-        print(Color.ROUGE + "Choose either -f or -l argument" + Color.FIN)
+
+    elif not args.gen:
+        while True:
+            algo = input(Color.ROUGE, "In which algorithm do you want to encrypt the password?", Color.FIN)
+            if algo == 1:
+                print("[The MD5 hash is:", cracker.generate_the_hack(1, args.pwd))
+                break
+            if algo == 2:
+                print("[SHA-256 hash is", cracker.generate_the_hack(2, args.pwd))
+                break
+            else:
+                print(Color.ROUGE, "Invalid input, please enter 1 for MD5, or 2 for sha-256)", Color.FIN)
+                continue
+
+if args.gen and not args.pwd:
+    print(Color.ROUGE + "You must provide a password to encrypt, dummy. Use -pwd for that. Example: -pwd 'password' where password will be encrypted", Color.FIN)
+
+if not args.file and not args.plength and not args.gen:
+    print(Color.ROUGE + "Enter -h to display help" + Color.FIN)
 
