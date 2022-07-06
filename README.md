@@ -12,4 +12,4 @@ V3: Adding sha-256 to parameters for more diversity
 
 <hr><br>
 <h2> Future improvements:</h2>
-    <pre>--->   Adding a hash detector for more efficiency</pre>
+    <pre>--->   "Finished project for now"</pre>
