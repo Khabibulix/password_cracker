@@ -18,7 +18,7 @@ class Cracker:
         Cracking using a wordlist
         :param hash_provided: hash to crack
         :param file: wordlist to use
-        :return:
+        :return found: we want to know if it was efficient
         """
         try:
             found = False
@@ -26,44 +26,23 @@ class Cracker:
             for mot in opened_file.readlines():
                 mot = mot.strip("\n").encode("utf8")
                 hash = hashlib.md5(mot).hexdigest()
+                hash_sha = hashlib.sha256(mot).hexdigest()
                 if hash == hash_provided:
                     print(Layout.VERT + "Password found", str(mot).replace("b'", "")[:-1], "--", hash + Layout.FIN)
                     found = True
+                    return found
+                if hash_sha == hash_provided:
+                    print(Layout.VERT + "Password found", str(mot).replace("b'", "")[:-1], "--", hash_sha + Layout.FIN)
+                    found = True
+                    return found
             if not found:
                 print(Layout.ROUGE + "Not found" + Layout.FIN)
+                return found
             opened_file.close()
 
         except FileNotFoundError as fnfe:
             print(Layout.ROUGE + "File does not exist:", str(fnfe) + Layout.FIN)
             sys.exit(1)
-
-    @staticmethod
-    def crack_incr(hash_provided, length, _currpass=[]):
-        """
-        Cracking using bruteforce, not really effective
-        :param hash_provided: hash md5 to crack
-        :param length: length of password to crack
-        :param _currpass: temporary list modifying via recursion
-        :return:
-        """
-
-        lettres = string.ascii_letters
-        pwd = "".join(_currpass)
-
-        if length >= 1:
-            if len(_currpass) == 0:
-                _currpass = ['a' for _ in range(length)]
-                crack_incr(hash_provided, length, _currpass)
-            else:
-                for c in lettres:
-                    _currpass[length - 1] = c
-                    currhash = hashlib.md5(pwd.encode("utf8")).hexdigest()
-                    print("Trying:", pwd, "-->", currhash)
-                    if currhash == hash_provided:
-                        print(Layout.VERT + "Password found", pwd + Layout.FIN)
-                        sys.exit(0)
-                    else:
-                        crack_incr(hash_provided, length - 1, _currpass)
 
     @staticmethod
     def crack_smart(hash_provided, pattern, _index=0):
@@ -76,7 +55,7 @@ class Cracker:
         MAJ = string.ascii_uppercase
         CHIFFRES = string.digits
         MIN = string.ascii_lowercase
-
+        found = False
         if _index < len(pattern):
             if pattern[_index] in MAJ + CHIFFRES + MIN:
                 cracker.crack_smart(hash_provided, pattern, _index+1)
@@ -113,6 +92,8 @@ class Cracker:
         else:
             return None
 
+
+
 def display_time():
     print("Durée :", str(time.time() - debut), "secondes")
 
@@ -140,13 +121,13 @@ cracker = Cracker()
 if args.pwd:
     if args.file and not args.plength:
         print("[Cracking using wordlist", args.file,"]")
-        Cracker.crack_dict(args.md5, args.file)
+        cracker.crack_dict(args.pwd, args.file)
     elif args.plength and not args.file:
         print("[Cracking using incremental mode for", str(args.plength), "letter(s)]")
-        Cracker.crack_incr(args.md5, args.plength)
+        cracker.crack_incr(args.pwd, args.plength)
     elif args.pattern:
         print("[Cracking using pattern mode for", str(args.pattern),"]")
-        Cracker.crack_smart(args.md5, args.pattern)
+        cracker.crack_smart(args.pwd, args.pattern)
     elif args.gen: #if no hash, we create one
         pwd = args.pwd
         args = vars(parser.parse_args())
@@ -179,6 +160,6 @@ if args.gen and not args.pwd:
           Layout.FIN_UNDERLINE+
           " -pwd 'password' where password will be encrypted",)
 
-if not args.file and not args.plength and not args.gen:
+if not args.file and not args.plength and not args.gen and not args.pattern:
     print(Layout.ROUGE + "Enter -h to display help" + Layout.FIN)
 
