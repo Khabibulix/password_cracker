@@ -59,29 +59,36 @@ class Cracker:
         if _index < len(pattern):
             if pattern[_index] in MAJ + CHIFFRES + MIN:
                 cracker.crack_smart(hash_provided, pattern, _index+1)
-            if "^" == pattern[_index]:
-                for c in MAJ:
-                    p = pattern.replace("^", c, 1)
-                    currhash = hashlib.md5(p.encode("utf8")).hexdigest()
-                    if currhash == hash_provided:
-                        print(Layout.VERT + "Found: " + p + Layout.FIN)
-                    cracker.crack_smart(hash_provided, p, _index + 1)
+            # if "^" == pattern[_index]:
+            #     for c in MAJ:
+            #         p = pattern.replace("^", c, 2)
+            #         currhash = hashlib.md5(p.encode("utf8")).hexdigest()
+            #         if currhash == hash_provided:
+            #             print(Layout.VERT + "Found: " + p + Layout.FIN)
+            #             found = True
+            #             break
+            #         cracker.crack_smart(hash_provided, p, _index + 1)
             if "*" == pattern[_index]:
                 for c in MIN:
-                    p = pattern.replace("*", c, 1)
+                    p = pattern.replace("*", c, 2)
+
                     currhash = hashlib.md5(p.encode("utf8")).hexdigest()
+
                     if currhash == hash_provided:
-                        print(Layout.VERT + "Found: " + p + Layout.FIN)
+                        #print(Layout.VERT + "Found: " + p + Layout.FIN)
+                        found = True
+                        break
                     cracker.crack_smart(hash_provided, p, _index + 1)
-            if "²" == pattern[_index]:
-                for c in CHIFFRES:
-                    p = pattern.replace("²", c, 1)
-                    currhash = hashlib.md5(p.encode("utf8")).hexdigest()
-                    if currhash == hash_provided:
-                        print(Layout.VERT + "Found: " + p + Layout.FIN)
-                    cracker.crack_smart(hash_provided, p, _index + 1)
-        else:
-            return
+            # if "²" == pattern[_index]:
+            #     for c in CHIFFRES:
+            #         p = pattern.replace("²", c, 2)
+            #         currhash = hashlib.md5(p.encode("utf8")).hexdigest()
+            #         if currhash == hash_provided:
+            #             print(Layout.VERT + "Found: " + p + Layout.FIN)
+            #             found = True
+            #             break
+            #         cracker.crack_smart(hash_provided, p, _index + 1)
+        return found
 
     @staticmethod
     def generate_the_hack(arg, pwd_to_encrypt):
