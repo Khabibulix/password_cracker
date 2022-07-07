@@ -12,4 +12,6 @@ V3: Adding sha-256 to parameters for more diversity
 
 <hr><br>
 <h2> Future improvements:</h2>
-    <pre>--->   Base64</pre>
+    <pre>
+    --->   Base64
+    --->   Finishing sha-256 implementation</pre>
