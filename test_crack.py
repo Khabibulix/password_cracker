@@ -1,6 +1,25 @@
 from crack import *
 import pytest
+import importlib
 
+
+def test_layout_color():
+    assert Layout.ROUGE.endswith("1m")
+
+def test_methods_of_Cracker_class_for_crack_dict():
+    assert getattr(cracker, "crack_dict")
+
+def test_methods_of_Cracker_class_for_crack_smart():
+    assert getattr(cracker, "crack_smart")
+
+def test_import_of_hashlib():
+    assert importlib.util.find_spec("hashlib")
+
+def test_import_of_string():
+    assert importlib.util.find_spec('string')
+
+def test_import_of_argparse():
+    assert importlib.util.find_spec('argparse')
 
 def test_crack_dict_with_md5():
     assert cracker.crack_dict("95fa9d10dd5aed2c42004a915de00c8d", "wordlist.txt") == True
@@ -38,6 +57,10 @@ def test_crack_smart_with_sha_256_with_numbers():
 def test_crack_smart_with_md5_with_lower_case_and_upper_case():
     assert cracker.crack_smart("56f27dc9bb026e86ee241fa197d00fb0", "^b^") == True
     #BbB
+
+def test_crack_smart_withmd5_and_sha_256_for_all_characters():
+    assert cracker.crack_smart("56f27dc9bb026e86ee241fa197d00fb0", "*^3*") == True and cracker.crack_smart("927fb10118a9b87f40a56e31a6ec5e1e", "*^3*") == True
+    #b83b"""
 
 
 def test_generate_the_hack_for_md5():

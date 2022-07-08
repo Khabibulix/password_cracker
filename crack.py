@@ -111,7 +111,9 @@ class Cracker:
             return None
 
 cracker = Cracker()
+print(cracker.crack_smart("56f27dc9bb026e86ee241fa197d00fb0", "*^3*"))
 
+"""
 def display_time():
     print("Durée :", str(time.time() - debut), "secondes")
 
@@ -124,10 +126,10 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument("-f", "--file", dest="file", help="Path to wordlist file", required=False)
 parser.add_argument("-g", "--gen", dest="gen", help="Choose hashing of password (1 for md5, 2 for sha-256",required=False, type=int)
-parser.add_argument("-pwd", "--password", dest="pwd", help="Password to encrypt")
-parser.add_argument("-hash", dest="hashed", help="Hashed Password", required=False)
+parser.add_argument("-pwd", "--password", dest="pwd", help="Password")
 parser.add_argument("-l", dest="plength", help="Password Length", type=int, required=False)
 parser.add_argument("-p", dest="pattern", help="Using pattern of password (^=Maj, *=Min, ²=Chiffre)",required=False)
+
 
 args = parser.parse_args()
 
@@ -180,3 +182,4 @@ if args.gen and not args.pwd:
 
 if not args.file and not args.plength and not args.gen and not args.pattern:
     print(Layout.ROUGE + "Enter -h to display help" + Layout.FIN)
+"""
