@@ -59,36 +59,47 @@ class Cracker:
         if _index < len(pattern):
             if pattern[_index] in MAJ + CHIFFRES + MIN:
                 cracker.crack_smart(hash_provided, pattern, _index+1)
-            # if "^" == pattern[_index]:
-            #     for c in MAJ:
-            #         p = pattern.replace("^", c, 2)
-            #         currhash = hashlib.md5(p.encode("utf8")).hexdigest()
-            #         if currhash == hash_provided:
-            #             print(Layout.VERT + "Found: " + p + Layout.FIN)
-            #             found = True
-            #             break
-            #         cracker.crack_smart(hash_provided, p, _index + 1)
+            if "^" == pattern[_index]:
+                for c in MAJ:
+                    p = pattern.replace("^", c, 2)
+                    if len(hash_provided) == 32:
+                        currhash = hashlib.md5(p.encode("utf8")).hexdigest()
+                    if len(hash_provided) == 64:
+                        currhash = hashlib.sha256(p.encode("utf8")).hexdigest()
+                    if currhash == hash_provided:
+                        print(Layout.VERT + "Found in maj: " + p + Layout.FIN)
+                        found = True
+                        return found
+                    else:
+                        cracker.crack_smart(hash_provided, p, _index + 1)
+
             if "*" == pattern[_index]:
                 for c in MIN:
                     p = pattern.replace("*", c, 2)
-
-                    currhash = hashlib.md5(p.encode("utf8")).hexdigest()
-
+                    if len(hash_provided) == 32:
+                        currhash = hashlib.md5(p.encode("utf8")).hexdigest()
+                    if len(hash_provided) == 64:
+                        currhash = hashlib.sha256(p.encode("utf8")).hexdigest()
                     if currhash == hash_provided:
-                        #print(Layout.VERT + "Found: " + p + Layout.FIN)
+                        print(Layout.VERT + "Found in min: " + p + Layout.FIN)
                         found = True
-                        break
-                    cracker.crack_smart(hash_provided, p, _index + 1)
-            # if "²" == pattern[_index]:
-            #     for c in CHIFFRES:
-            #         p = pattern.replace("²", c, 2)
-            #         currhash = hashlib.md5(p.encode("utf8")).hexdigest()
-            #         if currhash == hash_provided:
-            #             print(Layout.VERT + "Found: " + p + Layout.FIN)
-            #             found = True
-            #             break
-            #         cracker.crack_smart(hash_provided, p, _index + 1)
-        return found
+                        return found
+                    else:
+                        cracker.crack_smart(hash_provided, p, _index + 1)
+
+            if "²" == pattern[_index]:
+                for c in CHIFFRES:
+                    p = pattern.replace("²", c, 2)
+                    if len(hash_provided) == 32:
+                        currhash = hashlib.md5(p.encode("utf8")).hexdigest()
+                    if len(hash_provided) == 64:
+                        currhash = hashlib.sha256(p.encode("utf8")).hexdigest()
+                    if currhash == hash_provided:
+                        print(Layout.VERT + "Found: " + p + Layout.FIN)
+                        found = True
+                        return found
+                    else:
+                        cracker.crack_smart(hash_provided, p, _index + 1)
 
     @staticmethod
     def generate_the_hack(arg, pwd_to_encrypt):
@@ -99,18 +110,18 @@ class Cracker:
         else:
             return None
 
-
+cracker = Cracker()
 
 def display_time():
     print("Durée :", str(time.time() - debut), "secondes")
 
 parser = argparse.ArgumentParser(
-    description="████████████████████████████"
+               description="████████████████████████████"
                 +Layout.BOLD+Layout.UNDERLINE+
-                "Password Cracker"+Layout.FIN+
-                "█████████████████████████████████",
-    epilog="██████████████████████████████████████████████████████████████████████████████"
-)
+               "Password Cracker"+Layout.FIN+
+               "█████████████████████████████████",
+                epilog="██████████████████████████████████████████████████████████████████████████████")
+
 parser.add_argument("-f", "--file", dest="file", help="Path to wordlist file", required=False)
 parser.add_argument("-g", "--gen", dest="gen", help="Choose hashing of password (1 for md5, 2 for sha-256",required=False, type=int)
 parser.add_argument("-pwd", "--password", dest="pwd", help="Password to encrypt")
@@ -123,50 +134,49 @@ args = parser.parse_args()
 debut = time.time()
 atexit.register(display_time)
 
-cracker = Cracker()
+
 
 if args.pwd:
     if args.file and not args.plength:
-        print("[Cracking using wordlist", args.file,"]")
-        cracker.crack_dict(args.pwd, args.file)
+       print("[Cracking using wordlist", args.file,"]")
+       cracker.crack_dict(args.pwd, args.file)
     elif args.plength and not args.file:
-        print("[Cracking using incremental mode for", str(args.plength), "letter(s)]")
-        cracker.crack_incr(args.pwd, args.plength)
+       print("[Cracking using incremental mode for", str(args.plength), "letter(s)]")
+       cracker.crack_incr(args.pwd, args.plength)
     elif args.pattern:
-        print("[Cracking using pattern mode for", str(args.pattern),"]")
-        cracker.crack_smart(args.pwd, args.pattern)
+       print("[Cracking using pattern mode for", str(args.pattern),"]")
+       cracker.crack_smart(args.pwd, args.pattern)
     elif args.gen: #if no hash, we create one
-        pwd = args.pwd
-        args = vars(parser.parse_args())
-        if args["gen"] == 1:  # md5
-            print("[MD5 hash is:", cracker.generate_the_hack(1, pwd), "]")
-        if args["gen"] == 2:  # sha-256
-            print("[SHA-256 hash is", cracker.generate_the_hack(2, pwd), "]")
-        args = parser.parse_args()
+       pwd = args.pwd
+       args = vars(parser.parse_args())
+       if args["gen"] == 1:  # md5
+             print("[MD5 hash is:", cracker.generate_the_hack(1, pwd), "]")
+       if args["gen"] == 2:  # sha-256
+             print("[SHA-256 hash is", cracker.generate_the_hack(2, pwd), "]")
+       args = parser.parse_args()
 
     elif not args.gen:
         while True:
-            algo = input(Layout.ROUGE, "In which algorithm do you want to encrypt the password?", Layout.FIN)
-            if algo == 1:
-                print(Layout.UNDERLINE+"[The MD5 hash is:",Layout.FIN_UNDERLINE, cracker.generate_the_hack(1, args.pwd))
-                break
-            if algo == 2:
-                print(Layout.UNDERLINE+"[SHA-256 hash is",Layout.FIN_UNDERLINE, cracker.generate_the_hack(2, args.pwd))
-                break
-            else:
-                print(Layout.ROUGE, "Invalid input, please enter 1 for MD5, or 2 for sha-256)", Layout.FIN)
-                continue
+         algo = input(Layout.ROUGE+ "In which algorithm do you want to encrypt the password?"+ Layout.FIN)
+         if algo == 1:
+            print(Layout.UNDERLINE+"[The MD5 hash is:",Layout.FIN_UNDERLINE, cracker.generate_the_hack(1, args.pwd))
+            break
+         if algo == 2:
+            print(Layout.UNDERLINE+"[SHA-256 hash is",Layout.FIN_UNDERLINE, cracker.generate_the_hack(2, args.pwd))
+            break
+         else:
+            print(Layout.ROUGE, "Invalid input, please enter 1 for MD5, or 2 for sha-256)", Layout.FIN)
+            continue
 
 if args.gen and not args.pwd:
     print(Layout.ROUGE +
-          "You must provide a password to encrypt, dummy. Use -pwd for that. "
-          #+Layout.FIN+
-          +Layout.UNDERLINE +
-          "Example:"+
-          Layout.FIN+
-          Layout.FIN_UNDERLINE+
-          " -pwd 'password' where password will be encrypted",)
+   "You must provide a password to encrypt, dummy. Use -pwd for that. "
+   #+Layout.FIN+
+   +Layout.UNDERLINE +
+   "Example:"+
+   Layout.FIN+
+   Layout.FIN_UNDERLINE+
+   " -pwd 'password' where password will be encrypted",)
 
 if not args.file and not args.plength and not args.gen and not args.pattern:
     print(Layout.ROUGE + "Enter -h to display help" + Layout.FIN)
-

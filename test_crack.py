@@ -12,6 +12,32 @@ def test_crack_dict_with_sha_256():
 
 def test_crack_smart_with_md5_with_lower_case():
     assert cracker.crack_smart("d9d7dbddc29177b121a6aa1bb09d15fd", "*a*") == True
+    #bab
+
+
+def test_crack_smart_with_sha_256_with_lower_case():
+    assert cracker.crack_smart("ecdd97405c79b408ee7791029d05d2b57893d9b06a1282531e0df729daefcef5", "*a*") == True
+    #bab
+
+def test_crack_smart_with_md5_with_upper_case():
+    assert cracker.crack_smart("96c119ee89e0b239407244b51e38fa61", "^A^") == True
+    #BAB
+
+def test_crack_smart_with_sha_256_with_upper_case():
+    assert cracker.crack_smart("5a421865e06163d285dbe857d63b445980f9bf6309c68ec558c62ff6315400ba", "^A^") == True
+    #BAB
+
+def test_crack_smart_with_md5_with_numbers():
+    assert cracker.crack_smart("310dcbbf4cce62f762a2aaa148d556bd", "²3²") == True
+    #333
+
+def test_crack_smart_with_sha_256_with_numbers():
+    assert cracker.crack_smart("556d7dc3a115356350f1f9910b1af1ab0e312d4b3e4fc788d2da63668f36d017", "²3²") == True
+    #333
+
+def test_crack_smart_with_md5_with_lower_case_and_upper_case():
+    assert cracker.crack_smart("56f27dc9bb026e86ee241fa197d00fb0", "^b^") == True
+    #BbB
 
 
 def test_generate_the_hack_for_md5():
